@@ -4,6 +4,7 @@ import ftplib
 from datetime import datetime
 import json
 import os
+import tempfile
 import zipfile
 from raven import Client
 
@@ -13,7 +14,7 @@ import slumber
 import config
 
 sentry_client = Client(config.SENTRY_DSN)
-TEMPDIR = '/Users/syphar/tmp/_backup/' #tempfile.mkdtemp()
+TEMPDIR = tempfile.mkdtemp()
 
 _api_cache = None
 
