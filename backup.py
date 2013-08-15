@@ -70,6 +70,7 @@ def backup(filename, fn):
 
             first = True
 
+            count = 0
             for item in _data_iter(fn):
                 if first:
                     first = False
@@ -83,7 +84,11 @@ def backup(filename, fn):
                     indent=4
                 )))
 
+                count += 1
+
             output_file.write(u"\n]\n")
+
+        print '\twrote {} records'.format(count)
 
     except:
         sentry_client.captureException()
