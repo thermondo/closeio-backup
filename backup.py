@@ -98,6 +98,10 @@ def backup(filename, fn):
 def doit():
     backup('lead.json', _api().lead.get)
     backup('contact.json', _api().contact.get)
+    backup('activity.json', _api().activity.get)
+    backup('activity_note.json', _api().activity.note.get)
+    backup('activity_email.json', _api().activity.email.get)
+    backup('activity_call.json', _api().activity.call.get)
     backup('opportunity.json', _api().opportunity.get)
     backup('task.json', _api().task.get)
     backup('status_lead.json', _api().status.lead.get)
