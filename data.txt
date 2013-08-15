@@ -1,0 +1,78 @@
+[
+{
+    "id": "stat_06hVs2dQuVjam7GOj8gOKGX30g8MakUP1BbnzP5WaIi", 
+    "label": "Installateur -  kein Interesse", 
+    "slug": "installateur_kein_interesse"
+},
+{
+    "id": "stat_6vyqatu4PYVwQzE8oqQyrBddhXXG6yn6PlzZmpfnOqx", 
+    "label": "Neu - noch nicht zugewiesen", 
+    "slug": "neu_noch_nicht_zugewiesen"
+},
+{
+    "id": "stat_DRjAyMQk6LkuTo2b0Z2CRHrROCmkZr3OyQY1VwuUwFo", 
+    "label": "Hersteller", 
+    "slug": null
+},
+{
+    "id": "stat_K5Ttdi06W0GWqnrkI5QEHxteU1JZgJwTUTZtoZlskq7", 
+    "label": "FWintern", 
+    "slug": null
+},
+{
+    "id": "stat_NSxzbLOLVYRXq9WWzETYDGkqIUPm75P6kNJaNiUGYXF", 
+    "label": "Installateur - schlechte Erfahrungen", 
+    "slug": "installateur_schlechte_erfahrungen"
+},
+{
+    "id": "stat_PmkFJRxUcddvkkdZeD9KTv300I0cMOtntOnWi5r2mkO", 
+    "label": "Installateur", 
+    "slug": null
+},
+{
+    "id": "stat_drYIZMBagxfQAtVs4p7rn0Sm0JFgMH80RnB0v0R1CMq", 
+    "label": "Kunde B2B und sonstige", 
+    "slug": "kunde_b2b_und_sonstige"
+},
+{
+    "id": "stat_hjH3WXUMxMnI27NRW5twNvRRzozhYqefLwFCD6JoE2s", 
+    "label": "Energie-Effizienz-Experten", 
+    "slug": "energie_effizienz_experten"
+},
+{
+    "id": "stat_iVqY5uhmdEiH9y88WrrcshI7hmlRzEB00BPgU63vW9H", 
+    "label": "Installateur - Festpreisangebot", 
+    "slug": "installateur_festpreisangebot"
+},
+{
+    "id": "stat_nKVPnJXniwlDDadSmT3l3Oj0eatbCLmOSRYBydd5gqV", 
+    "label": "Kunde - verwaltet über Opportunities", 
+    "slug": "kunde_verwaltet_ber_opportunities"
+},
+{
+    "id": "stat_nnBIPRhNjtKcpjMst9URaCvQVJMau4HxzshRO841APx", 
+    "label": "FWintern", 
+    "slug": null
+},
+{
+    "id": "stat_rAYpeUtc7gdtRYnCnuFXKYqN3mYh83LL1fqoRWUeCdX", 
+    "label": "Installateur - Festpreisangebot", 
+    "slug": null
+},
+{
+    "id": "stat_tW0ruUbh0NdWFIj1f0sgMow3Q043ywWOYWwuyVGyeV7", 
+    "label": "Schornsteinfeger", 
+    "slug": null
+},
+{
+    "id": "stat_tqYV4PTNuLBDilGin2dMGslWQjemnndrtK3S2fFzko0", 
+    "label": "Neu - noch nicht zugewiesen", 
+    "slug": null
+},
+{
+    "id": "stat_wyriXLAu3f0Be1qUWsVAM3ro81YpPw5t6DyOUoZj2oK", 
+    "label": "Kunde - verwaltet über Opportunities", 
+    "slug": null
+},
+
+]
