@@ -9,6 +9,7 @@ import zipfile
 from raven import Client
 
 import requests
+from requests.adapters import HTTPAdapter
 import slumber
 
 import config
@@ -25,6 +26,8 @@ def _api():
         _session = requests.Session()
         _session.auth = (config.CLOSEIO_API_KEY, "")
         _session.verify = True
+        _session.mount('http://', HTTPAdapter(max_retries=5))
+        _session.mount('https://', HTTPAdapter(max_retries=5))
 
         _api_cache = slumber.API(
             'https://app.close.io/api/v1/',
