@@ -20,6 +20,17 @@ TEMPDIR = tempfile.mkdtemp()
 _api_cache = None
 
 
+import httplib
+httplib.HTTPConnection.debuglevel = 1
+
+import logging
+logging.basicConfig()
+logging.getLogger().setLevel(logging.DEBUG)
+requests_log = logging.getLogger("requests.packages.urllib3")
+requests_log.setLevel(logging.DEBUG)
+requests_log.propagate = True
+
+
 def _api():
     global _api_cache
     if not _api_cache:
@@ -96,7 +107,6 @@ def backup(filename, fn):
 
     except:
         sentry_client.captureException()
-        raise
 
 
 def doit():
@@ -105,6 +115,10 @@ def doit():
     backup('activity.json', _api().activity.get)
     backup('activity_note.json', _api().activity.note.get)
     backup('activity_email.json', _api().activity.email.get)
+    backup('activity_emailthread.json', _api().activity.emailthread.get)
+    backup('activity_call.json', _api().activity.call.get)
+    backup('activity_statuschange_lead.json', _api().activity.status_change.lead.get)
+    backup('activity_statuschange_opportunity.json', _api().activity.status_change.opportunity.get)
     backup('activity_call.json', _api().activity.call.get)
     backup('opportunity.json', _api().opportunity.get)
     backup('task.json', _api().task.get)
@@ -142,4 +156,3 @@ def doit():
 
 if __name__ == '__main__':
     doit()
-
