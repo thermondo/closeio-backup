@@ -105,7 +105,6 @@ def doit():
     backup('activity_note.json', _api().activity.note.get)
     backup('activity_email.json', _api().activity.email.get)
     backup('activity_emailthread.json', _api().activity.emailthread.get)
-    backup('activity_call.json', _api().activity.call.get)
     backup('activity_statuschange_lead.json', _api().activity.status_change.lead.get)
     backup('activity_statuschange_opportunity.json', _api().activity.status_change.opportunity.get)
     backup('activity_call.json', _api().activity.call.get)
