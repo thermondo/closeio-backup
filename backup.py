@@ -20,17 +20,6 @@ TEMPDIR = tempfile.mkdtemp()
 _api_cache = None
 
 
-import httplib
-httplib.HTTPConnection.debuglevel = 1
-
-import logging
-logging.basicConfig()
-logging.getLogger().setLevel(logging.DEBUG)
-requests_log = logging.getLogger("requests.packages.urllib3")
-requests_log.setLevel(logging.DEBUG)
-requests_log.propagate = True
-
-
 def _api():
     global _api_cache
     if not _api_cache:
