@@ -5,7 +5,7 @@ from datetime import datetime
 import json
 import os
 import tempfile
-import zipfile
+import tarfile
 from raven import Client
 
 import requests
@@ -115,15 +115,14 @@ def doit():
     backup('status_opportunity.json', _api().status.opportunity.get)
     backup('email_template.json', _api().email_template.get)
 
-    print "creating zipfile"
-    zipfilename = os.path.join(TEMPDIR, datetime.now().isoformat() + ".zip")
-    with zipfile.ZipFile(zipfilename, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
+    print "creating compressed file"
+    zipfilename = os.path.join(TEMPDIR, datetime.now().isoformat() + ".tar.gz")
+    with tarfile.open(zipfilename, "w:gz") as tar:
         for file in glob.glob(os.path.join(TEMPDIR, "*.json")):
-            zf.write(
+            tar.add(
                 file,
-                os.path.basename(file)
+                arcname=os.path.basename(file),
             )
-
             os.remove(file)
 
     print "uploading to FTP-server"
