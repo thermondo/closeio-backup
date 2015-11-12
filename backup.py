@@ -142,4 +142,8 @@ def doit():
 
 
 if __name__ == '__main__':
-    doit()
+    try:
+        doit()
+    except:
+        sentry_client.captureException()
+        raise
