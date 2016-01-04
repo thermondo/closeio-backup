@@ -2,7 +2,7 @@ Flask==0.10.1
 itsdangerous==0.24
 Jinja2==2.8
 MarkupSafe==0.23
-raven==5.8.1
+raven==5.9.0
 requests==2.8.1
 slumber==0.7.1
 Werkzeug==0.11.2
