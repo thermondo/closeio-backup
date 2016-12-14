@@ -3,6 +3,6 @@ itsdangerous==0.24
 Jinja2==2.8
 MarkupSafe==0.23
 raven==5.32.0
-requests==2.12.3
+requests==2.12.4
 slumber==0.7.1
 Werkzeug==0.11.11
