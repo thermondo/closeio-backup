@@ -95,7 +95,7 @@ def backup(filename, fn):
 
         print('\twrote {} records'.format(count))
 
-    except:
+    except Exception:
         sentry_client.captureException()
 
 
@@ -106,8 +106,10 @@ def doit():
     backup('activity_note.json', _api().activity.note.get)
     backup('activity_email.json', _api().activity.email.get)
     backup('activity_emailthread.json', _api().activity.emailthread.get)
-    backup('activity_statuschange_lead.json', _api().activity.status_change.lead.get)
-    backup('activity_statuschange_opportunity.json', _api().activity.status_change.opportunity.get)
+    backup('activity_statuschange_lead.json',
+           _api().activity.status_change.lead.get)
+    backup('activity_statuschange_opportunity.json',
+           _api().activity.status_change.opportunity.get)
     backup('activity_call.json', _api().activity.call.get)
     backup('opportunity.json', _api().opportunity.get)
     backup('task.json', _api().task.get)
@@ -117,7 +119,8 @@ def doit():
 
     print("creating compressed file...")
 
-    zipfilename = "closeio-backup_" + datetime.today().strftime('%Y-%m-%d') + ".tar.gz"
+    zipfilename = 'closeio-backup_' + \
+                  datetime.today().strftime('%Y-%m-%d') + '.tar.gz'
     zipfilepath = os.path.join(TEMPDIR, zipfilename)
 
     with tarfile.open(zipfilepath, "w:gz") as tar:
@@ -144,6 +147,6 @@ def doit():
 if __name__ == '__main__':
     try:
         doit()
-    except:
+    except Exception:
         sentry_client.captureException()
         raise
