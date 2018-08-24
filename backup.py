@@ -12,9 +12,12 @@ import requests
 from requests.adapters import HTTPAdapter
 import slumber
 
-import config
+SENTRY_DSN = os.getenv('SENTRY_DSN')
+CLOSEIO_API_KEY = os.getenv("CLOSEIO_API_KEY")
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 
-sentry_client = Client(config.SENTRY_DSN)
+sentry_client = Client(SENTRY_DSN)
 TEMPDIR = tempfile.mkdtemp()
 
 _api_cache = None
@@ -24,7 +27,7 @@ def _api():
     global _api_cache
     if not _api_cache:
         _session = requests.Session()
-        _session.auth = (config.CLOSEIO_API_KEY, "")
+        _session.auth = (CLOSEIO_API_KEY, '')
         _session.verify = True
         _session.mount('http://', HTTPAdapter(max_retries=5))
         _session.mount('https://', HTTPAdapter(max_retries=5))
