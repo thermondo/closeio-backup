@@ -1,6 +1,6 @@
 import io
 import glob
-import ftplib
+import boto3
 from datetime import datetime
 import json
 import os
@@ -41,7 +41,6 @@ def _api():
 def _data_iter(func, *args, **kwargs):
     skip = 0
     limit = 100
-
     while True:
         kwargs['_skip'] = skip
         kwargs['_limit'] = limit
@@ -61,10 +60,10 @@ def _data_iter(func, *args, **kwargs):
 def backup(filename, fn):
     try:
         filename = os.path.join(TEMPDIR, filename)
-        print "backup {} to {}".format(
+        print("backup {} to {}".format(
             fn.__self__._store['base_url'],
             filename,
-        )
+        ))
 
         if os.path.exists(filename):
             os.remove(filename)
@@ -73,7 +72,6 @@ def backup(filename, fn):
             output_file.write(u"[\n")
 
             first = True
-
             count = 0
             for item in _data_iter(fn):
                 if first:
@@ -81,7 +79,7 @@ def backup(filename, fn):
                 else:
                     output_file.write(u',\n')
 
-                output_file.write(unicode(json.dumps(
+                output_file.write(str(json.dumps(
                     item,
                     ensure_ascii=False,
                     sort_keys=True,
@@ -92,7 +90,7 @@ def backup(filename, fn):
 
             output_file.write(u"\n]\n")
 
-        print '\twrote {} records'.format(count)
+        print('\twrote {} records'.format(count))
 
     except:
         sentry_client.captureException()
@@ -114,31 +112,30 @@ def doit():
     backup('status_opportunity.json', _api().status.opportunity.get)
     backup('email_template.json', _api().email_template.get)
 
-    print "creating compressed file"
-    zipfilename = os.path.join(TEMPDIR, datetime.now().isoformat() + ".tar.gz")
-    with tarfile.open(zipfilename, "w:gz") as tar:
+    print("creating compressed file...")
+
+    zipfilename = "closeio-backup_" + datetime.today().strftime('%Y-%m-%d') + ".tar.gz"
+    zipfilepath = os.path.join(TEMPDIR, zipfilename)
+
+    with tarfile.open(zipfilepath, "w:gz") as tar:
         for file in glob.glob(os.path.join(TEMPDIR, "*.json")):
             tar.add(
                 file,
                 arcname=os.path.basename(file),
             )
-            os.remove(file)
 
-    print "uploading to FTP-server"
-    session = ftplib.FTP_TLS(
-        config.FTP_SERVER,
-        config.FTP_USER,
-        config.FTP_PASSWORD,
-    )
-
+    s3 = boto3.resource('s3')
     try:
-        with open(zipfilename) as zf:
-            session.storbinary('STOR ' + os.path.basename(zipfilename), zf)
-
+        print("starting upload...")
+        s3.meta.client.upload_file(
+            zipfilepath,
+            'thermondo-closeio-export-test',
+            zipfilename
+        )
     finally:
-        session.quit()
+        print("upload done")
 
-    os.remove(zipfilename)
+    os.remove(zipfilepath)
 
 
 if __name__ == '__main__':
