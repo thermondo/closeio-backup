@@ -81,7 +81,7 @@ def backup(filename, fn):
                 else:
                     output_file.write(u',\n')
 
-                output_file.write(unicode(json.dumps(
+                output_file.write(str(json.dumps(
                     item,
                     ensure_ascii=False,
                     sort_keys=True,
