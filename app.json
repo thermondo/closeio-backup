@@ -1,0 +1,47 @@
+{
+  "name": "closeio-backup",
+  "logo": "https://close.io/static/img/favicon.png",
+  "description": "Backup Close.io organisation data on an AWS S3 bucket",
+  "keywords": [
+    "closeio",
+    "backup",
+    "aws",
+    "s3"
+  ],
+  "repository": "https://github.com/Thermondo/closeio-backup",
+  "env": {
+    "AWS_ACCESS_KEY_ID": {
+      "description": "AWS access key"
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+      "description": "AWS secret key"
+
+    },
+    "AWS_S3_BUCKET": {
+      "description": "Name of the bucket you want store the backup on"
+    },
+    "CLOSEIO_API_KEY": {
+      "description": "A Close.io API access token"
+    }
+  },
+  "formation": {},
+  "addons": [
+    {
+      "plan": "scheduler"
+    },
+    {
+      "plan": "deadmanssnitch"
+    },
+    {
+      "plan": "sentry"
+    },
+    {
+      "plan": "logentries"
+    }
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}

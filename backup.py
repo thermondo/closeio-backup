@@ -1,44 +1,41 @@
+#!/usr/bin/env python
+"""Create backup of a Close.io organization and store it on AWS S3."""
 import io
-import glob
-import ftplib
-from datetime import datetime
 import json
 import os
-import tempfile
 import tarfile
-from raven import Client
+import tempfile
+import time
 
+import boto3
 import requests
-from requests.adapters import HTTPAdapter
 import slumber
+from raven import Client
+from requests.adapters import HTTPAdapter
 
-import config
-
-sentry_client = Client(config.SENTRY_DSN)
-TEMPDIR = tempfile.mkdtemp()
-
-_api_cache = None
+AWS_S3_BUCKET = os.getenv('AWS_S3_BUCKET')
+CLOSEIO_API_KEY = os.getenv('CLOSEIO_API_KEY')
+SENTRY_DSN = os.getenv('SENTRY_DSN')
 
 
-def _api():
-    global _api_cache
-    if not _api_cache:
-        _session = requests.Session()
-        _session.auth = (config.CLOSEIO_API_KEY, "")
-        _session.verify = True
-        _session.mount('http://', HTTPAdapter(max_retries=5))
-        _session.mount('https://', HTTPAdapter(max_retries=5))
+def get_closeio_api():
+    """Return slumber API client for Close.io API."""
+    _session = requests.Session()
+    _session.auth = (CLOSEIO_API_KEY, "")
+    _session.verify = True
+    _session.mount('http://', HTTPAdapter(max_retries=5))
+    _session.mount('https://', HTTPAdapter(max_retries=5))
 
-        _api_cache = slumber.API(
-            'https://app.close.io/api/v1/',
-            session=_session
-        )
+    _api_cache = slumber.API(
+        'https://app.close.io/api/v1/',
+        session=_session
+    )
 
     return _api_cache
 
 
-# handles pagination in the closeio-api:
 def _data_iter(func, *args, **kwargs):
+    """Handle Close.io API pagination."""
     skip = 0
     limit = 100
 
@@ -58,98 +55,90 @@ def _data_iter(func, *args, **kwargs):
             skip += limit
 
 
-def backup(filename, fn):
-    try:
-        filename = os.path.join(TEMPDIR, filename)
-        print("backup {} to {}".format(
-            fn.__self__._store['base_url'],
-            filename,
-        ))
+def backup(tarball: tarfile.TarFile, filename, fn):
+    """Create JSON dump and add to tarball."""
+    with io.BytesIO() as output_file:
+        tar_info = tarfile.TarInfo(filename)
 
-        if os.path.exists(filename):
-            os.remove(filename)
+        print(f"Adding {filename} to archive...", end=' ')
 
-        with io.open(filename, 'w', encoding='utf-8') as output_file:
-            output_file.write(u"[\n")
+        output_file.write(b"[\n")
 
-            first = True
+        for item, count in enumerate(_data_iter(fn)):
+            if count != 0:
+                output_file.write(b",")
 
-            count = 0
-            for item in _data_iter(fn):
-                if first:
-                    first = False
-                else:
-                    output_file.write(u',\n')
-
-                output_file.write(str(json.dumps(
+            output_file.write(
+                json.dumps(
                     item,
                     ensure_ascii=False,
-                    sort_keys=True,
-                    indent=4
-                )))
-
-                count += 1
-
-            output_file.write(u"\n]\n")
-
-        print('\twrote {} records').format(count)
-
-    except:
-        sentry_client.captureException()
-
-
-def doit():
-    backup('lead.json', _api().lead.get)
-    backup('contact.json', _api().contact.get)
-    backup('activity.json', _api().activity.get)
-    backup('activity_note.json', _api().activity.note.get)
-    backup('activity_email.json', _api().activity.email.get)
-    backup('activity_emailthread.json', _api().activity.emailthread.get)
-    backup(
-        'activity_statuschange_lead.json',
-        _api().activity.status_change.lead.get,
-    )
-    backup(
-        'activity_statuschange_opportunity.json',
-        _api().activity.status_change.opportunity.get,
-    )
-    backup('activity_call.json', _api().activity.call.get)
-    backup('opportunity.json', _api().opportunity.get)
-    backup('task.json', _api().task.get)
-    backup('status_lead.json', _api().status.lead.get)
-    backup('status_opportunity.json', _api().status.opportunity.get)
-    backup('email_template.json', _api().email_template.get)
-
-    print("creating compressed file")
-    zipfilename = os.path.join(TEMPDIR, datetime.now().isoformat() + ".tar.gz")
-    with tarfile.open(zipfilename, "w:gz") as tar:
-        for file in glob.glob(os.path.join(TEMPDIR, "*.json")):
-            tar.add(
-                file,
-                arcname=os.path.basename(file),
+                ).encode()
             )
-            os.remove(file)
 
-    print("uploading to FTP-server")
-    session = ftplib.FTP_TLS(
-        config.FTP_SERVER,
-        config.FTP_USER,
-        config.FTP_PASSWORD,
-    )
+        output_file.write(b"\n]\n")
 
-    try:
-        with open(zipfilename) as zf:
-            session.storbinary('STOR ' + os.path.basename(zipfilename), zf)
+        output_file.seek(0)
+        tar_info.size = output_file.tell()
+        tarball.addfile(tar_info, output_file)
 
-    finally:
-        session.quit()
+        print("Done!")
 
-    os.remove(zipfilename)
+
+def main():
+    """Create backup and upload to AWS S3."""
+    tmp_dir = tempfile.mkdtemp()
+    filename = time.strftime('%Y-%m-%d.tar.gz')
+    archive_path = os.path.join(tmp_dir, filename)
+    api = get_closeio_api()
+    with tarfile.open(archive_path, "w:gz") as tarball:
+        backup(tarball, 'lead.json', api.lead.get)
+        backup(tarball, 'contact.json', api.contact.get)
+        backup(tarball, 'activity.json', api.activity.get)
+        backup(tarball, 'activity_note.json', api.activity.note.get)
+        backup(tarball, 'activity_email.json', api.activity.email.get)
+        backup(
+            tarball,
+            'activity_emailthread.json',
+            api.activity.emailthread.get
+        )
+        backup(
+            tarball,
+            'activity_statuschange_lead.json',
+            api.activity.status_change.lead.get,
+        )
+        backup(
+            tarball,
+            'activity_statuschange_opportunity.json',
+            api.activity.status_change.opportunity.get,
+        )
+        backup(
+            tarball,
+            'activity_call.json', api.activity.call.get)
+        backup(
+            tarball,
+            'opportunity.json', api.opportunity.get)
+        backup(tarball, 'task.json', api.task.get)
+        backup(tarball, 'status_lead.json', api.status.lead.get)
+        backup(tarball, 'status_opportunity.json', api.status.opportunity.get)
+        backup(tarball, 'email_template.json', api.email_template.get)
+
+    print("Uploading to AWS S3 bucket...", end=' ')
+    s3 = boto3.resource('s3')
+
+    with open(archive_path) as zf:
+        s3.Bucket(AWS_S3_BUCKET).put_object(Key=filename, Body=zf)
+
+    print("Done!")
+
+    print("Cleaning up filesystem...", end=' ')
+    os.remove(archive_path)
+    print("Done!")
 
 
 if __name__ == '__main__':
+    sentry_client = Client(SENTRY_DSN)
     try:
-        doit()
+        main()
     except BaseException:
         sentry_client.captureException()
         raise
