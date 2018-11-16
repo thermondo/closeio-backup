@@ -61,10 +61,10 @@ def _data_iter(func, *args, **kwargs):
 def backup(filename, fn):
     try:
         filename = os.path.join(TEMPDIR, filename)
-        print "backup {} to {}".format(
+        print("backup {} to {}".format(
             fn.__self__._store['base_url'],
             filename,
-        )
+        ))
 
         if os.path.exists(filename):
             os.remove(filename)
@@ -92,7 +92,7 @@ def backup(filename, fn):
 
             output_file.write(u"\n]\n")
 
-        print '\twrote {} records'.format(count)
+        print('\twrote {} records').format(count)
 
     except:
         sentry_client.captureException()
@@ -105,8 +105,14 @@ def doit():
     backup('activity_note.json', _api().activity.note.get)
     backup('activity_email.json', _api().activity.email.get)
     backup('activity_emailthread.json', _api().activity.emailthread.get)
-    backup('activity_statuschange_lead.json', _api().activity.status_change.lead.get)
-    backup('activity_statuschange_opportunity.json', _api().activity.status_change.opportunity.get)
+    backup(
+        'activity_statuschange_lead.json',
+        _api().activity.status_change.lead.get,
+    )
+    backup(
+        'activity_statuschange_opportunity.json',
+        _api().activity.status_change.opportunity.get,
+    )
     backup('activity_call.json', _api().activity.call.get)
     backup('opportunity.json', _api().opportunity.get)
     backup('task.json', _api().task.get)
@@ -114,7 +120,7 @@ def doit():
     backup('status_opportunity.json', _api().status.opportunity.get)
     backup('email_template.json', _api().email_template.get)
 
-    print "creating compressed file"
+    print("creating compressed file")
     zipfilename = os.path.join(TEMPDIR, datetime.now().isoformat() + ".tar.gz")
     with tarfile.open(zipfilename, "w:gz") as tar:
         for file in glob.glob(os.path.join(TEMPDIR, "*.json")):
@@ -124,7 +130,7 @@ def doit():
             )
             os.remove(file)
 
-    print "uploading to FTP-server"
+    print("uploading to FTP-server")
     session = ftplib.FTP_TLS(
         config.FTP_SERVER,
         config.FTP_USER,
@@ -144,6 +150,6 @@ def doit():
 if __name__ == '__main__':
     try:
         doit()
-    except:
+    except BaseException:
         sentry_client.captureException()
         raise
