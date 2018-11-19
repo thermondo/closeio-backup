@@ -12,6 +12,7 @@ import requests
 import slumber
 from raven import Client
 from requests.adapters import HTTPAdapter
+from slumber.exceptions import HttpServerError
 
 AWS_S3_BUCKET = os.getenv('AWS_S3_BUCKET')
 CLOSEIO_API_KEY = os.getenv('CLOSEIO_API_KEY')
@@ -38,12 +39,22 @@ def _data_iter(func, *args, **kwargs):
     """Handle Close.io API pagination."""
     skip = 0
     limit = 100
+    retries = 0
 
     while True:
         kwargs['_skip'] = skip
         kwargs['_limit'] = limit
 
-        response = func(*args, **kwargs)
+        try:
+            response = func(*args, **kwargs)
+        except HttpServerError:
+            if retries < 10:
+                time.sleep(min(600, 2 ** retries))
+                retries += 1
+                continue
+            raise
+        else:
+            retries = 0
 
         for item in response['data']:
             yield item
