@@ -12,7 +12,7 @@ import requests
 import slumber
 from raven import Client
 from requests.adapters import HTTPAdapter
-from slumber.exceptions import HttpServerError
+from slumber.exceptions import HttpServerError, HttpClientError
 
 AWS_S3_BUCKET = os.getenv('AWS_S3_BUCKET')
 CLOSEIO_API_KEY = os.getenv('CLOSEIO_API_KEY')
@@ -53,6 +53,9 @@ def _data_iter(func, *args, **kwargs):
                 retries += 1
                 continue
             raise
+        except HttpClientError:
+            skip += limit
+            continue
         else:
             retries = 0
 
